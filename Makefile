@@ -10,7 +10,11 @@ PI_ADDRESS?=pi@192.168.0.105:/flash/program_attiny
 
 TWI_LIB_HEADERS=./usitwislave/usitwislave.h
 
-HEADERS=utils.h 
+EFUSE=0xFF
+HFUSE=0xDF
+LFUSE=0x62
+
+HEADERS=utils.h
 OBJECT_FILES=powermonkey.o
 
 CXX=avr-gcc
@@ -34,7 +38,7 @@ usitwislave.a: usitwislave/usitwislave.c
 
 attiny_utils.a: attiny_utils/attiny_utils.a
 	cp attiny_utils/attiny_utils.a .
-	
+
 attiny_utils/attiny_utils.a :
 	$(MAKE) -C attiny_utils
 
@@ -45,7 +49,13 @@ $(TARGET).hex: $(TARGET)
 	$(OBJ2HEX) -R .eeprom -O ihex $(TARGET) $@
 
 upload: $(TARGET).hex
-	$(AVRDUDE) -c avrisp -p $(MCU_AVRDUDE) -P $(USB_PORT) -b $(PROGRAMMER_BAUD) -U flash:w:$(TARGET).hex:i 
+	$(AVRDUDE) -c avrisp -p $(MCU_AVRDUDE) -P $(USB_PORT) -b $(PROGRAMMER_BAUD) -U flash:w:$(TARGET).hex:i
+
+readfuses: $(TARGET).hex
+	$(AVRDUDE) -c avrisp -p $(MCU_AVRDUDE) -P $(USB_PORT) -b $(PROGRAMMER_BAUD) -U lfuse:r:-:h -U hfuse:r:-:h -U efuse:r:-:h
+
+writefuses: $(TARGET).hex
+	$(AVRDUDE) -c avrisp -p $(MCU_AVRDUDE) -P $(USB_PORT) -b $(PROGRAMMER_BAUD) -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m
 
 copy_to_pi: $(TARGET).hex
 	scp $^ $(PI_ADDRESS)
@@ -54,4 +64,4 @@ clean:
 	$(MAKE) -C attiny_utils clean
 	rm $(TARGET) $(TARGET).hex $(OBJECT_FILES) usitwislave.a usitwislave/usitwislave.o
 
-.PHONY: upload copy_to_pi clean
+.PHONY: upload copy_to_pi clean readfuses

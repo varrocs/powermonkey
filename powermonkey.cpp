@@ -1,4 +1,4 @@
-/* 
+/*
  Pin Layout:
 	 --------
 RESET 	1|	|8 VCC
@@ -24,7 +24,7 @@ static bool delay_in_action = false;
 static uint8_t poweroff_delay	= 0;
 static uint16_t reanimate_delay	= 0;
 
-static inline void delay_sec(uint8_t sec) 
+static inline void delay_sec(uint8_t sec)
 {
 	while(sec--) _delay_ms(1000);
 }
@@ -35,7 +35,7 @@ typedef enum power_command {
 
 static void parse_command(uint8_t input_buffer_length, const uint8_t* input_buffer)
 {
-	if (input_buffer_length < 4) 
+	if (input_buffer_length < 4)
 	{
 		return;
 	}
@@ -52,11 +52,13 @@ static void parse_command(uint8_t input_buffer_length, const uint8_t* input_buff
 }
 
 static void on_data(
-		uint8_t input_buffer_length, 
+		uint8_t input_buffer_length,
 		const uint8_t* input_buffer,
-		uint8_t *output_buffer_length, 
+		uint8_t *output_buffer_length,
 		uint8_t *output_buffer) {
 	parse_command(input_buffer_length, input_buffer);
+
+	output_buffer_length = 0;
 	return;
 }
 
@@ -65,7 +67,7 @@ static void on_idle(void) {
 
 	if (delay_in_action) return;
 
-	if (poweroff_delay && reanimate_delay) 
+	if (poweroff_delay && reanimate_delay)
 	{
 		delay_in_action = true;
 		delay_sec(poweroff_delay);
@@ -74,7 +76,7 @@ static void on_idle(void) {
 		pin_out_high(PIN_POWER);
 
 		poweroff_delay = 0;
-		reanimate_delay = 0; 
+		reanimate_delay = 0;
 		delay_in_action = false;
 	}
 
@@ -98,6 +100,5 @@ int main() {
 			on_data,
 			on_idle
 			);
-	for(;;) {}
-	return 0; 
+	return 0;
 }
