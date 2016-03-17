@@ -1,3 +1,6 @@
 [submodule "usitwislave"]
 	path = usitwislave
 	url = https://github.com/eriksl/usitwislave.git
+[submodule "attiny_utils"]
+	path = attiny_utils
+	url = git@github.com:varrocs/attiny_utils.git
